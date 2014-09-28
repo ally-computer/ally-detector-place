@@ -14,7 +14,11 @@ module Ally
     
       def initialize(inquiry = nil)
         super # do not delete
-        @key = @settings[:apikey] if @settings.key?(:apikey)
+        if @settings.key?(:apikey)
+          @key = @settings[:apikey]
+        else
+          raise "Missing place detectors config for 'apikey'"
+        end
       end
 
       def detect
@@ -44,10 +48,10 @@ module Ally
           if resp['status'] == 'OK'
             resp['results']
           else
-            # TODO: Handle error
+            raise "Got non-OK response status from google maps"
           end
         else
-          # TODO: handle error
+          raise "Got non-200 response code from google maps"
         end
       end
  

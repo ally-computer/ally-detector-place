@@ -11,21 +11,21 @@ module Ally
       require 'json'
 
       attr_accessor :places
-    
+
       def initialize(inquiry = nil)
         super # do not delete
-        if @settings.key?(:apikey)
-          @key = @settings[:apikey]
+        if @plugin_settings.key?(:apikey)
+          @key = @plugin_settings[:apikey]
         else
-          raise "Missing place detectors config for 'apikey'"
+          fail "Missing place detectors config for 'apikey'"
         end
       end
 
       def detect
         search_str = @inquiry.raw
         words = @inquiry.type_of(:words).map(&:downcase)
-        search_str = words[(words.index('at')+1)..-1].join(' ') if words.include?('at')
-        search_str = words[(words.index('in')+1)..-1].join(' ') if words.include?('in')
+        search_str = words[(words.index('at') + 1)..-1].join(' ') if words.include?('at')
+        search_str = words[(words.index('in') + 1)..-1].join(' ') if words.include?('in')
         return nil if search_str.length == 0
         results = api_request(search_str)
         unless results.nil?
@@ -48,13 +48,12 @@ module Ally
           if resp['status'] == 'OK'
             resp['results']
           else
-            raise "Got non-OK response status from google maps"
+            fail 'Got non-OK response status from google maps'
           end
         else
-          raise "Got non-200 response code from google maps"
+          fail 'Got non-200 response code from google maps'
         end
       end
- 
     end
   end
 end

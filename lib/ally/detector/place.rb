@@ -10,8 +10,6 @@ module Ally
       require 'uri'
       require 'json'
 
-      attr_accessor :places
-
       def initialize(inquiry = nil)
         super # do not delete
         if @plugin_settings.key?(:apikey)
@@ -24,14 +22,18 @@ module Ally
       def detect
         search_str = @inquiry.raw
         words = @inquiry.type_of(:words).map(&:downcase)
-        search_str = words[(words.index('at') + 1)..-1].join(' ') if words.include?('at')
-        search_str = words[(words.index('in') + 1)..-1].join(' ') if words.include?('in')
-        return nil if search_str.length == 0
-        results = api_request(search_str)
-        unless results.nil?
-          @data_detected = true
-          @places = results
+        %w( at in near ).each do |f|
+          if words.include?(f)
+            search_str = words[(words.index(f) + 1)..-1].join(' ') if words.include?(f)
+            return nil if search_str.length == 0
+            results = api_request(search_str)
+            unless results.nil?
+              @data_detected = true
+              return results
+            end 
+          end
         end
+        return nil
       end
 
       def api_request(query)
